@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Player</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Use Inter as the default font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+
+    <!-- Main container for centering content -->
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        
+        <!-- Card container for the audio player -->
+        <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8">
+            <div class="text-center">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-2">Audio Player</h1>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">Press play to listen to the audio file.</p>
+            </div>
+
+            <!-- HTML5 Audio Element -->
+            <!-- The 'controls' attribute adds play, pause, volume, and progress bar controls. -->
+            <!-- The 'src' attribute points to your audio file. -->
+            <audio controls class="w-full rounded-lg">
+                <source src="Semantics Preservation_ The W-Shaped Framework for Certifying AI Safety in Aviation.mp3
+" type="audio/mpeg">
+                <!-- Fallback text for browsers that don't support the audio element -->
+                Your browser does not support the audio element.
+            </audio>
+
+        </div>
+        
+        <footer class="text-center mt-8 text-sm text-gray-500 dark:text-gray-400">
+            <p>A simple static page for playing audio.</p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
+
