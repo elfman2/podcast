@@ -3,50 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Player</title>
+    <title>Language Specific Audio Player</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <style>
-        /* Use Inter as the default font */
         body {
             font-family: 'Inter', sans-serif;
         }
+        /* Custom styles for the audio player */
+        audio::-webkit-media-controls-panel {
+            background-color: #f3f4f6;
+        }
+        audio::-webkit-media-controls-play-button,
+        audio::-webkit-media-controls-volume-slider {
+            background-color: #d1d5db;
+            border-radius: 9999px;
+        }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-    <!-- Main container for centering content -->
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">Language-Specific Audio Player</h1>
+        <p class="text-gray-600 mb-2">This page attempts to play an audio file based on your browser's language setting.</p>
         
-        <!-- Card container for the audio player -->
-        <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8">
-            <div class="text-center">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-2">Audio Player</h1>
-                <p class="text-gray-600 dark:text-gray-400 mb-6">Press play to listen to the audio file.</p>
-            </div>
+        <!-- Display detected language -->
+        <p class="text-sm text-gray-500 mb-6">
+            Detected Language: <span id="language-display" class="font-semibold text-indigo-600">Detecting...</span>
+        </p>
 
-            <!-- HTML5 Audio Element -->
-            <!-- The 'controls' attribute adds play, pause, volume, and progress bar controls. -->
-            <!-- The 'src' attribute points to your audio file. -->
-            <audio controls class="w-full rounded-lg">
-                <source src="Semantics Preservation_ The W-Shaped Framework for Certifying AI Safety in Aviation.mp3
-" type="audio/mpeg">
-                <!-- Fallback text for browsers that don't support the audio element -->
-                Your browser does not support the audio element.
-            </audio>
+        <!-- Audio Player -->
+        <audio id="audio-player" controls class="w-full rounded-lg">
+            Your browser does not support the audio element.
+        </audio>
 
+        <!-- Instructions for the user -->
+        <div class="mt-8 text-left bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <h2 class="font-semibold text-lg text-gray-700 mb-2">How to Use</h2>
+            <ol class="list-decimal list-inside text-gray-600 space-y-2">
+                <li>Create audio files for each language you want to support.</li>
+                <li>Name them using the language code, like <code>audio-en.mp3</code>, <code>audio-es.mp3</code>, <code>audio-fr.mp3</code>, etc.</li>
+                <li>Place these audio files in the same directory as this HTML file.</li>
+                <li>The script will automatically try to load the correct file. If a specific language file (e.g., <code>audio-en-US.mp3</code>) isn't found, it will try the base language (<code>audio-en.mp3</code>).</li>
+                <li>If no matching language file is found, it will default to <code>audio-en.mp3</code>.</li>
+            </ol>
         </div>
-        
-        <footer class="text-center mt-8 text-sm text-gray-500 dark:text-gray-400">
-            <p>A simple static page for playing audio.</p>
-        </footer>
-
     </div>
+
+    <script>
+        // --- Main script to set the audio source based on browser language ---
+
+        window.addEventListener('DOMContentLoaded', (event) => {
+            // 1. Define the mapping of language codes to audio files
+            // The key is the language code (e.g., 'en', 'fr', 'es')
+            // The value is the path to the audio file.
+            // For this example, we assume files are named 'audio-<code>.mp3'
+            const audioSources = {
+                'fr': "IA et Sécurité Aéronautique _ Comment l'ONERA et Airbus Helicopters garantissent la _Sémantique_ des IA Embarquées.mp3", // English
+                'en': 'Semantics Preservation_ The W-Shaped Framework for Certifying AI Safety in Aviation.mp3', // French
+                'es': 'IA Segura en Vuelo_ Preservación Semántica para Certificar Modelos en Aviación.mp3', // Spanish
+                'de': 'KI im Hubschrauber_ Wenn _gut genug_ sicher ist – Das Airbus_ONERA-Paradigma.mp3', // German
+            };
+
+            // 2. Get browser language
+            // navigator.language returns the full code (e.g., "en-US")
+            const browserLang = navigator.language || navigator.userLanguage; 
+            
+            // Extract the base language code (e.g., "en" from "en-US")
+            const baseLang = browserLang.split('-')[0];
+
+            // 3. Find the correct audio source
+            let audioSrc = audioSources[browserLang]; // Try to find specific language (e.g., en-US)
+            if (!audioSrc) {
+                audioSrc = audioSources[baseLang]; // Fallback to base language (e.g., en)
+            }
+            if (!audioSrc) {
+                audioSrc = audioSources['en']; // Default to English if no match is found
+            }
+
+            // 4. Update the UI
+            const audioPlayer = document.getElementById('audio-player');
+            const languageDisplay = document.getElementById('language-display');
+            
+            // Set the audio source
+            audioPlayer.src = audioSrc;
+            
+            // Display the detected language
+            languageDisplay.textContent = `${browserLang} (Loading: ${audioSrc})`;
+
+            // Optional: Handle cases where the audio file might not exist
+            audioPlayer.addEventListener('error', () => {
+                console.error(`Error loading audio file: ${audioPlayer.src}`);
+                languageDisplay.textContent = `Error: Could not load ${audioSrc}. Defaulting to English.`;
+                // Try to load the default English audio as a final fallback
+                if (audioPlayer.src !== audioSources['en']) {
+                   audioPlayer.src = audioSources['en'];
+                   audioPlayer.load();
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
-
