@@ -3,106 +3,677 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Language Specific Audio Player</title>
-    <!-- Tailwind CSS for styling -->
+    <title>Implementation of airborne ML models with semantics preservation</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Custom styles for the audio player */
-        audio::-webkit-media-controls-panel {
-            background-color: #f3f4f6;
+        .content-section h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
         }
-        audio::-webkit-media-controls-play-button,
-        audio::-webkit-media-controls-volume-slider {
-            background-color: #d1d5db;
-            border-radius: 9999px;
+        .content-section h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .content-section p, .content-section li {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        .content-section strong {
+            color: #1e40af; /* Deep blue for emphasis */
+        }
+        .content-section .citation {
+            color: #1d4ed8;
+            font-weight: 500;
+            cursor: pointer;
+        }
+         .content-section .citation:hover {
+            text-decoration: underline;
+         }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        .lang-selector button.active {
+            background-color: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        figure {
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        figcaption {
+            margin-top: 0.5rem;
+            font-style: italic;
+            color: #4b5563;
+        }
+        table {
+            width: 100%;
+            margin: 1.5rem 0;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+        .table-container {
+            overflow-x: auto;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-50 text-gray-800">
 
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">Language-Specific Audio Player</h1>
-        <p class="text-gray-600 mb-2">This page attempts to play an audio file based on your browser's language setting.</p>
-        
-        <!-- Display detected language -->
-        <p class="text-sm text-gray-500 mb-6">
-            Detected Language: <span id="language-display" class="font-semibold text-indigo-600">Detecting...</span>
-        </p>
+    <div id="app-container" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
-        <!-- Audio Player -->
-        <audio id="audio-player" controls class="w-full rounded-lg">
-            Your browser does not support the audio element.
-        </audio>
+        <!-- Header -->
+        <header class="bg-white shadow-md rounded-xl p-6 mb-6">
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <div>
+                    <h1 id="main-title" class="text-2xl md:text-3xl font-bold text-gray-900"></h1>
+                    <p id="authors" class="text-sm text-gray-500 mt-2"></p>
+                </div>
+                <div id="lang-selector" class="flex items-center space-x-1 border border-gray-200 rounded-lg p-1">
+                    <button data-lang="fr" class="px-3 py-1 rounded-md text-sm transition">FR</button>
+                    <button data-lang="de" class="px-3 py-1 rounded-md text-sm transition">DE</button>
+                    <button data-lang="es" class="px-3 py-1 rounded-md text-sm transition">ES</button>
+                    <button data-lang="en" class="px-3 py-1 rounded-md text-sm transition">EN</button>
+                </div>
+            </div>
+        </header>
 
-        <!-- Instructions for the user -->
-        <div class="mt-8 text-left bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <h2 class="font-semibold text-lg text-gray-700 mb-2">How to Use</h2>
-            <ol class="list-decimal list-inside text-gray-600 space-y-2">
-                <li>Create audio files for each language you want to support.</li>
-                <li>Name them using the language code, like <code>audio-en.mp3</code>, <code>audio-es.mp3</code>, <code>audio-fr.mp3</code>, etc.</li>
-                <li>Place these audio files in the same directory as this HTML file.</li>
-                <li>The script will automatically try to load the correct file. If a specific language file (e.g., <code>audio-en-US.mp3</code>) isn't found, it will try the base language (<code>audio-en.mp3</code>).</li>
-                <li>If no matching language file is found, it will default to <code>audio-en.mp3</code>.</li>
-            </ol>
+        <!-- Audio Player Section -->
+        <section id="audio-player-section" class="bg-white shadow-md rounded-xl p-6 mb-6">
+            <h2 id="audio-title" class="text-lg font-semibold mb-3"></h2>
+            <audio id="audio-player" controls class="w-full">
+                <source id="audio-source" src="" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <p class="text-xs text-gray-400 mt-2" id="audio-note"></p>
+        </section>
+
+        <div class="lg:grid lg:grid-cols-4 lg:gap-8">
+            <!-- Navigation -->
+            <nav class="lg:col-span-1 mb-6 lg:mb-0">
+                <div class="bg-white shadow-md rounded-xl p-4 sticky top-8">
+                    <ul id="navigation" class="space-y-2">
+                        <!-- Navigation links will be inserted here -->
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main id="content-area" class="lg:col-span-3">
+                <div id="content-wrapper" class="bg-white shadow-md rounded-xl p-6 md:p-8">
+                    <!-- Content will be injected here -->
+                </div>
+            </main>
         </div>
+
     </div>
 
     <script>
-        // --- Main script to set the audio source based on browser language ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DATA & TRANSLATIONS ---
+        const pdfTitle = "Implementation of airborne ML models with semantics preservation";
 
-        window.addEventListener('DOMContentLoaded', (event) => {
-            // 1. Define the mapping of language codes to audio files
-            // The key is the language code (e.g., 'en', 'fr', 'es')
-            // The value is the path to the audio file.
-            // For this example, we assume files are named 'audio-<code>.mp3'
-            const audioSources = {
-                'fr': "IA et Sécurité Aéronautique _ Comment l'ONERA et Airbus Helicopters garantissent la _Sémantique_ des IA Embarquées.mp3", // English
-                'en': 'Semantics Preservation_ The W-Shaped Framework for Certifying AI Safety in Aviation.mp3', // French
-                'es': 'IA Segura en Vuelo_ Preservación Semántica para Certificar Modelos en Aviación.mp3', // Spanish
-                'de': 'KI im Hubschrauber_ Wenn _gut genug_ sicher ist – Das Airbus_ONERA-Paradigma.mp3', // German
-            };
-
-            // 2. Get browser language
-            // navigator.language returns the full code (e.g., "en-US")
-            const browserLang = navigator.language || navigator.userLanguage; 
-            
-            // Extract the base language code (e.g., "en" from "en-US")
-            const baseLang = browserLang.split('-')[0];
-
-            // 3. Find the correct audio source
-            let audioSrc = audioSources[browserLang]; // Try to find specific language (e.g., en-US)
-            if (!audioSrc) {
-                audioSrc = audioSources[baseLang]; // Fallback to base language (e.g., en)
-            }
-            if (!audioSrc) {
-                audioSrc = audioSources['en']; // Default to English if no match is found
-            }
-
-            // 4. Update the UI
-            const audioPlayer = document.getElementById('audio-player');
-            const languageDisplay = document.getElementById('language-display');
-            
-            // Set the audio source
-            audioPlayer.src = audioSrc;
-            
-            // Display the detected language
-            languageDisplay.textContent = `${browserLang} (Loading: ${audioSrc})`;
-
-            // Optional: Handle cases where the audio file might not exist
-            audioPlayer.addEventListener('error', () => {
-                console.error(`Error loading audio file: ${audioPlayer.src}`);
-                languageDisplay.textContent = `Error: Could not load ${audioSrc}. Defaulting to English.`;
-                // Try to load the default English audio as a final fallback
-                if (audioPlayer.src !== audioSources['en']) {
-                   audioPlayer.src = audioSources['en'];
-                   audioPlayer.load();
+        const content = {
+            // --- ENGLISH ---
+            en: {
+                title: pdfTitle,
+                authors: "Nicolas Valot¹, Louis Fabre¹, Benjamin Lesage², Ammar Mechouche¹, Claire Pagetti² (¹Airbus Helicopters, ²ONERA)",
+                audio: {
+                    title: `Audio Lecture: DeepDive - ${pdfTitle}`,
+                    note: "Note: This is a placeholder audio file. Custom audio files in each language should be provided."
+                },
+                nav: {
+                    abstract: "Abstract",
+                    intro: "I. Introduction",
+                    how_to_describe: "II. How to Describe a ML Model",
+                    applicability: "III. Applicability of the Approach",
+                    setup: "IV. Experimental Setup",
+                    results: "V. Results",
+                    related_work: "VI. Related Work",
+                    conclusion: "VII. Conclusion",
+                    references: "References",
+                    appendix: "VIII. Appendix"
+                },
+                sections: {
+                    abstract: `
+                        <h2>Abstract</h2>
+                        <p><strong>Machine Learning (ML)</strong> may offer new capabilities in airborne systems. However, as any piece of airborne systems, <strong>ML</strong>-based systems will be required to guarantee their safe operation. Thus, their development will have to be demonstrated to be compliant with the adequate guidance. So far, the European Union Aviation Safety Agency (<strong>EASA</strong>) has published a concept paper and an <strong>EUROCAE/SAE</strong> group is preparing <strong>ED-324</strong>. Both approaches delineate high-level objectives to confirm the <strong>ML</strong> model achieves its intended function and maintains training performance in the target environment.</p>
+                        <p>The paper aims to clarify the difference between an <strong>ML</strong> model and its corresponding unambiguous description, referred to as the <strong>Machine Learning Model Description (MLMD)</strong>. It then refines the essential notion of semantics preservation to ensure the accurate replication of the model. We apply our contributions to several industrial use cases to build and compare several target models.</p>
+                    `,
+                    intro: `
+                        <h2>I. Introduction</h2>
+                        <p><strong>Machine Learning (ML)</strong> has gained increased consideration even in airborne avionics systems. However, the introduction of <strong>ML</strong> algorithms in avionic embedded systems challenges the established practices of the development assurance industry. Thus, it has led to the emergence of new development assurance processes, as outlined in the <strong>EASA</strong> guidance <span class="citation" data-ref="10">[10]</span> and the yet to be published draft of the <strong>ED-324</strong>, with publicly available material <span class="citation" data-ref="14">[14]</span>, <span class="citation" data-ref="24">[24]</span>, <span class="citation" data-ref="23">[23]</span>. Both documents are limited to the design assurance levels related to the least critical failure conditions: Major and Minor.</p>
+                        <p><strong>Guidance approach.</strong> These documents address supervised, off-line trained, <strong>ML</strong> models and promote a W-shaped development life-cycle (outlined in Figure 1). It consists roughly of two main phases: 1) the design of the intended function (first V-cycle), and 2) its replication in the <strong>Target Model (TIM)</strong> (second V-cycle). The <strong>Target Model (TIM)</strong> captures both representation of the implemented <strong>ML</strong> model, and the target environment, i.e. the hardware and software platform and its configuration used to execute the model. The second V-cycle first implements the <strong>Machine Learning Model Description (MLMD)</strong> into a <strong>TIM</strong>, while ensuring the semantics preservation of the off-line trained model. The verification then assesses the correct replication of the <strong>TFM</strong> by the implementation.</p>
+                        <figure>
+                            <img src="https://placehold.co/600x300/e0e7ff/3730a3?text=Fig.+1:+ED-324+W-shape+Life+Cycle" alt="Figure 1: ED-324 W-shape Development Life Cycle" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 1:</strong> ED-324 W-shape Development Life Cycle</figcaption>
+                        </figure>
+                        <p><strong>Focus of the paper.</strong> This paper focuses on the construction of the <strong>MLMD</strong> as the bridge between the two phases. The <strong>Training Framework Model (TFM)</strong> results from off-line training and verification. It is expressed using the internal representation of a training framework. By contrast, the <strong>MLMD</strong> is a non-volatile and semantically-defined <strong>ML</strong> model, which is independent of training concerns, i.e. the <strong>MLMD</strong> does not contain learning rate or loss function. To build the <strong>MLMD</strong>, it is essential to first identify and formalise the <strong>TFM</strong> behaviour as well as the properties that must be maintained during implementation. The verification at the end of the first V phase aims to determine whether the <strong>ML</strong> model satisfies requirements and properties such as stability, generalisation, performance and robustness. Therefore, the implementation is expected to accurately encode the <strong>ML</strong> model mathematical operations (e.g. convolution or pooling) while preserving all properties fulfilled by the <strong>TFM</strong>.</p>
+                    `,
+                    how_to_describe: `
+                        <h2>II. How to Describe a ML Model</h2>
+                        <p><strong>ED-324</strong> defines a design assurance process to conceive and develop <strong>ML</strong>-based systems. One important expectation is to ensure that the <strong>TIM</strong> reproduces the <strong>TFM</strong> behaviour and the properties observed at the end of the design, and to facilitate its verification. The approach proposed by the standard is to introduce an intermediate description, the <strong>MLMD</strong>, between the two V cycles. The purpose of <strong>MLMD</strong> is to describe <strong>ML</strong> models in an unambiguous way, so that the implementation can start with a complete specification.</p>
+                        <h3>A. Understanding which properties to preserve</h3>
+                        <p>First, let us briefly outline what is done during the verification of the first V. A <strong>ML</strong> model is expected to fulfill some requirements and properties such as stability, generalisation, performance, robustness. Practically, several metrics are used to check whether those properties are met, and to identify the conditions under which those properties are fulfilled (e.g. range of input data). Figure 2 highlights this verification by the data scientists at the end of the first V.</p>
+                        <figure>
+                            <img src="https://placehold.co/500x250/e0e7ff/3730a3?text=Fig.+2:+TFM+verification" alt="Figure 2: TFM verification with a set of metrics" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 2:</strong> TFM verification with a set of metrics</figcaption>
+                        </figure>
+                        <h3>B. ED-324 objectives related to MLMD</h3>
+                        <p>The second V of the W-shape aims at preserving the properties satisfied by the <strong>TFM</strong>. For this purpose, <strong>ED-324</strong> relies on the definition of the <strong>MLMD</strong> as a bridge between <strong>ML</strong> model design (<strong>TFM</strong>) and <strong>ML</strong> model implementation, that we call the <strong>Target Model (TIM)</strong>. The purpose of the <strong>MLMD</strong> is to ensure that the <strong>TIM</strong> reproduces the <strong>TFM</strong> observed behaviour, with the intent that they both satisfy the same properties. This is highlighted in Figure 3.</p>
+                         <figure>
+                            <img src="https://placehold.co/500x200/e0e7ff/3730a3?text=Fig.+3:+MLMD+Properties" alt="Figure 3: MLMD to guarantee ML Model properties" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 3:</strong> MLMD to guarantee ML Model properties</figcaption>
+                        </figure>
+                    `,
+                    applicability: `
+                        <h2>III. Applicability of the Approach</h2>
+                        <p>In this section, we detail the approach proposed in Section II-D on different metrics to show that it is always possible to construct εM and gM. We then focus on how to build an <strong>MLMD</strong> at a replication-semantics-level SLx. We choose to rely on the <strong>ONNX</strong> format, one of the most widely-supported by popular training frameworks in the <strong>ML</strong> community. This makes <strong>ONNX</strong> a prime candidate as a <strong>MLMD</strong> format supporting Objective 1.</p>
+                        <h3>A. Constructing gM</h3>
+                        <p>We discuss various metrics for regression, classification, and object detection tasks.</p>
+                        <figure>
+                            <img src="https://placehold.co/600x250/e0e7ff/3730a3?text=Fig.+5:+gM+formula+for+regression" alt="Figure 5: Formula gM for the main regression tasks metrics" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 5:</strong> Formula gM for the main regression tasks metrics</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="https://placehold.co/400x300/e0e7ff/3730a3?text=Fig.+6:+min+IoU+metric" alt="Figure 6: min IoU metric" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 6:</strong> min IoU metric</figcaption>
+                        </figure>
+                        <h3>B. ONNX to support MLMD</h3>
+                        <p><strong>ONNX</strong> is an open source framework specialized in the inference phase. It relies on three components: <strong>ONNX</strong> core to describe an <strong>ML</strong> model, <strong>ONNX Runtime (ORT)</strong> to execute <strong>ONNX</strong> models, and <strong>ONNX</strong> script to transform <strong>ML</strong> model descriptions.</p>
+                        <figure>
+                            <img src="https://placehold.co/500x400/e0e7ff/3730a3?text=Fig.+7:+ONNX+UML+model" alt="Figure 7: ONNX simplified UML model" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 7:</strong> ONNX simplified UML model</figcaption>
+                        </figure>
+                        <h3>C. MLMD Build methods</h3>
+                        <p>We illustrate in Figure 8 the different layers involved in deriving a <strong>TIM</strong>. The graph vertices are <strong>ML</strong> model representation and environments, and the edges are SL transformations.</p>
+                        <figure>
+                            <img src="https://placehold.co/700x500/e0e7ff/3730a3?text=Fig.+8:+MLMD+Build+and+Implementation" alt="Figure 8: MLMD Build and Implementation" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 8:</strong> MLMD Build and Implementation</figcaption>
+                        </figure>
+                    `,
+                    setup: `
+                        <h2>IV. Experimental Setup</h2>
+                        <p>To evaluate the semantic preservation of <strong>ML</strong> models (§ II-C), we consider industrial use cases and their deployment as <strong>TIM</strong>. We further automate <strong>MLMD</strong> Build and Replication methods using tools available in the literature to assess how to derive and verify SL3 <strong>TIM</strong>, from a <strong>TFM</strong>. This results in a number of experimental configurations, each denoted as follows: <code>mdl-exp-repr-gen-env</code>.</p>
+                        <h3>A. ML models (mdl)</h3>
+                        <p>We present two use cases, intended to perform a regression task for helicopter avionics. The <strong>TFM</strong> for use cases are specified in the KERAS training framework.</p>
+                        <figure>
+                            <img src="https://placehold.co/700x250/e0e7ff/3730a3?text=Fig.+9:+Use+cases+ML+model+architecture" alt="Figure 9: Use cases ML model architecture" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 9:</strong> Use cases ML model architecture</figcaption>
+                        </figure>
+                        <h3>B. ONNX MLMD (exp)</h3>
+                        <p>Once the <strong>TFM</strong> has been trained, the <strong>MLMD</strong> is built using the legacy KERAS to <strong>ONNX</strong> exporter. We then apply automated or manual transformations to the exported model using <strong>ONNX</strong> script.</p>
+                        <h3>C. Code generators (gen and repr)</h3>
+                        <p>We consider open source code generators to generate C code in our evaluation: onnx2c, and acetone. We also manually designed an ANSYS Scade 6 model for the lstm use case.</p>
+                        <h3>D. Execution environment (env)</h3>
+                        <p>We consider two execution environments for our evaluation, a Linux-based Intel server (x86), and an NXP T1042 PowerPC (t1042).</p>
+                    `,
+                    results: `
+                        <h2>V. Results</h2>
+                        <p>The evaluation of the semantics preservation for the considered configurations relies on the approach proposed in Section III. We first consider for each use-case the properties satisfied by the <strong>TFM</strong>, and the corresponding budget gM for various metrics M, to compute the acceptable error εM between the <strong>TFM</strong> and the <strong>TIM</strong>.</p>
+                        <h3>A. Use case 1stm</h3>
+                        <figure>
+                            <img src="https://placehold.co/700x300/e0e7ff/3730a3?text=Fig.+10:+CDF+of+errors+(TFM+vs+Ground+Truth)" alt="Figure 10: Cumulative distribution of errors between the TFM and ground truth" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 10:</strong> Cumulative distribution of errors between the TFM and ground truth</figcaption>
+                        </figure>
+                        <div class="table-container">
+                            <h4>Table I: Regression metrics for 1stm</h4>
+                            <table>
+                                <thead><tr><th>M</th><th>M(1)</th><th>RM</th><th>εM</th></tr></thead>
+                                <tbody>
+                                    <tr><td>MAX</td><td>0.55</td><td>&lt;1.0</td><td>&lt;0.44</td></tr>
+                                    <tr><td>MAE</td><td>0.053</td><td>0.07</td><td>&lt;0.017</td></tr>
+                                    <tr><td>R²</td><td>0.841</td><td>&gt;0.83</td><td>&lt;0.008</td></tr>
+                                    <tr><td>EVS</td><td>0.849</td><td>&ge;0.83</td><td>&lt;0.013</td></tr>
+                                    <tr><td>Bias</td><td>-0.017</td><td>&le;0.03</td><td>&le;0.012</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <figure>
+                            <img src="https://placehold.co/700x300/e0e7ff/3730a3?text=Fig.+11:+CDF+of+errors+(TIM+vs+TFM)" alt="Figure 11: Cumulative distribution function of errors between the TFM and TIM" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 11:</strong> Cumulative distribution function of errors between the TFM and TIM</figcaption>
+                        </figure>
+                        <h3>B. Use case linear</h3>
+                        <div class="table-container">
+                            <h4>Table III: Regression metrics for linear</h4>
+                            <table>
+                                <thead><tr><th>M</th><th>M(1)</th><th>RM</th><th>εM</th></tr></thead>
+                                <tbody>
+                                    <tr><td>MAE</td><td>0.033</td><td>&lt;0.06</td><td>&lt;0.026</td></tr>
+                                    <tr><td>MSE</td><td>0.002</td><td>&lt;0.01</td><td>&lt;0.088</td></tr>
+                                    <tr><td>R²</td><td>0.821</td><td>&ge;0.8</td><td>&le;0.015</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-container">
+                            <h4>Table IV: Replication metrics for linear with εM=0.015</h4>
+                            <table>
+                                <thead><tr><th>TIM</th><th>max(|εi|)</th><th>&le;εM</th></tr></thead>
+                                <tbody>
+                                    <tr><td>-*-FP32-ort-x86</td><td>3e-7</td><td>Y</td></tr>
+                                    <tr><td>-*-FP32-onnx2c-t1042</td><td>7e-7</td><td>Y</td></tr>
+                                    <tr><td>-*-FP16-ort-x86</td><td>2e-3</td><td>Y</td></tr>
+                                    <tr><td>-*-INT16-ort-x86</td><td>2e-3</td><td>Y</td></tr>
+                                    <tr><td>-*-INT12-ort-x86</td><td>3e-2</td><td>N</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    `,
+                    related_work: `
+                        <h2>VI. Related Work</h2>
+                        <p>Model exporter tools are designed to translate the training framework semantics into the <strong>MLMD</strong> semantics. However, varied or repeated translations steps can lead to numerous compatibility and replication issues, reported in the survey <span class="citation" data-ref="21">[21]</span>. <span class="citation" data-ref="18">[18]</span> further highlighted the tradeoff between model inference performance and precision when using hardware accelerators.</p>
+                        <p>In the <strong>ML</strong> community, the <strong>ONNX</strong> exchange format is one of the most widely-supported by popular training frameworks. Prior works have built <strong>MLMD</strong> with NNEF <span class="citation" data-ref="17">[17]</span> and <strong>ONNX</strong> (Open Neural Network eXchange) <span class="citation" data-ref="15">[15]</span>. However, these approaches did not explore how to export a <strong>TFM</strong>, and how to verify its compliance to <strong>ED-324</strong> objectives. <span class="citation" data-ref="15">[15]</span> did consider bit-accurate replication which proved costly considering the number of moving parts involved in the execution of the <strong>TFM</strong>.</p>
+                        <p>Numerous frameworks can generate C, C++ or CUDA code compatible with airborne systems development life-cycle out of a <strong>MLMD</strong> <span class="citation" data-ref="31">[31]</span>, <span class="citation" data-ref="5">[5]</span>, <span class="citation" data-ref="28">[28]</span>. Indeed, in line with legacy guidance DO-178/ED-12, producing source code from the <strong>MLMD</strong> is a certification-friendly approach.</p>
+                    `,
+                    conclusion: `
+                        <h2>VII. Conclusion</h2>
+                        <p>In legacy avionics development, industrialization and certification require that verification of requirements or properties is performed in the <strong>TIM</strong>, unless an argument is provided to justify that verification which were performed on a different execution environment are still valid in the <strong>TIM</strong>. One argument could be a bit-accurate replication between <strong>TFM</strong> and the <strong>TIM</strong> which is a quite hard constraint on the development. To avoid this constraint, we propose a <strong>ML</strong> model semantics preservation definition and a supporting verification methodology, based on state-of-the-art <strong>ML</strong> metrics. This method relies on two independent processes: 1) the verification of the <strong>TFM</strong> metrics including budget gM, and using a test set including the ground truth, 2) the verification that the predictions of the <strong>TIM</strong> fit into error margin εM using a chosen set of <strong>TFM</strong> predictions. This second process does not require any knowledge of the metrics, nor the ground truth. It takes as input the <strong>MLMD</strong> including εM. Its objective is to demonstrate an upper bound of the cumulated rounding and approximations errors of the algorithm.</p>
+                        <p>We further decomposed the level of details captured by <strong>ML</strong> model representations into semantic levels, related to these margins. We considered how existing tools <span class="citation" data-ref="31">[31]</span>, <span class="citation" data-ref="20">[20]</span> could support the definition of (semi-)automated methods to Build a <strong>TIM</strong> and replicate a <strong>TFM</strong>, and we showed that they can indeed preserve the properties of industrial <strong>ML</strong> use cases <span class="citation" data-ref="16">[16]</span>, <span class="citation" data-ref="7">[7]</span>, <span class="citation" data-ref="22">[22]</span> from the <strong>TFM</strong> into a <strong>TIM</strong>.</p>
+                    `,
+                    references: `
+                        <h2>References</h2>
+                        <ul class="list-none p-0">
+                            <li id="ref-1"><strong>[1]</strong> IEEE Standard for Floating-Point Arithmetic. IEEE Std 754-2008, 2008.</li>
+                            <li id="ref-2"><strong>[2]</strong> A. V. Aho, et al. Compilers: Principles, Techniques, and Tools (2nd Edition). 2006.</li>
+                            <li id="ref-3"><strong>[3]</strong> J. Bai, et al. ONNX: Open Neural Network Exchange. 2019.</li>
+                            <li id="ref-5"><strong>[5]</strong> A. Cerioli, et al. NeuralCasting: A Front-End Compilation Infrastructure for Neural Networks. 2024.</li>
+                            <li id="ref-7"><strong>[7]</strong> C. del Cistia Gallimard, et al. Direct Load Recognition to Estimate the Damper Load on the H175 Fleet. 2023.</li>
+                            <li id="ref-10"><strong>[10]</strong> EASA. Concept Paper: guidance for Level 1 & 2 machine learning applications. 2024.</li>
+                            <li id="ref-14"><strong>[14]</strong> C. Gabreau, et al. EUROCAE WG114-SAE G34: a joint standardization initiative... 2023.</li>
+                            <li id="ref-15"><strong>[15]</strong> C. Gabreau, et al. A study of an ACAS-Xu exact implementation using ED-324/ARP6983. 2024.</li>
+                            <li id="ref-16"><strong>[16]</strong> C. D. C. Gallimard, et al. Harmonic Decomposition to Estimate Periodic Signals using Machine Learning Algorithms... 2022.</li>
+                            <li id="ref-17"><strong>[17]</strong> A. Gauffriau, et al. Formal description of ML models for unambiguous implementation. 2024.</li>
+                            <li id="ref-18"><strong>[18]</strong> F. Geyer, et al. Efficient and mathematically robust operations for certified neural networks inference. 2024.</li>
+                            <li id="ref-20"><strong>[20]</strong> Y. Ikarashi, et al. Exocompilation for productive programming of hardware accelerators. 2022.</li>
+                            <li id="ref-21"><strong>[21]</strong> P. Jajal, et al. Interoperability in Deep Learning: A User Survey and Failure Analysis of ONNX Model Converters. 2024.</li>
+                            <li id="ref-22"><strong>[22]</strong> J. Jouve, et al. Estimation of confidence margins for Direct Load Recognition (DLR)... 2023.</li>
+                            <li id="ref-23"><strong>[23]</strong> F. Kaakai, et al. Toward a machine learning development lifecycle... 2022.</li>
+                            <li id="ref-24"><strong>[24]</strong> F. Kaakai, et al. Data-centric operational design domain characterization... 2023.</li>
+                            <li id="ref-28"><strong>[28]</strong> F. S. Perotto, et al. Thinking the certification process of embedded ML-based aeronautical components using AIDGE... 2024.</li>
+                            <li id="ref-31"><strong>[31]</strong> I. D. A. Silva, et al. ACETONE: predictable programming framework for ML applications... 2022.</li>
+                        </ul>
+                    `
                 }
+            },
+            // --- FRENCH ---
+            fr: {
+                title: "Implémentation de modèles ML aéroportés avec préservation de la sémantique",
+                authors: "Nicolas Valot¹, Louis Fabre¹, Benjamin Lesage², Ammar Mechouche¹, Claire Pagetti² (¹Airbus Helicopters, ²ONERA)",
+                audio: {
+                    title: `Lecture Audio : DeepDive - Implémentation de modèles ML aéroportés...`,
+                    note: "Note : Ceci est un fichier audio de démonstration. Des fichiers audio personnalisés dans chaque langue doivent être fournis."
+                },
+                nav: {
+                    abstract: "Résumé",
+                    intro: "I. Introduction",
+                    how_to_describe: "II. Comment Décrire un Modèle ML",
+                    applicability: "III. Applicabilité de l'Approche",
+                    setup: "IV. Configuration Expérimentale",
+                    results: "V. Résultats",
+                    related_work: "VI. Travaux Connexes",
+                    conclusion: "VII. Conclusion",
+                    references: "Références",
+                    appendix: "VIII. Annexe"
+                },
+                sections: {
+                    abstract: `
+                        <h2>Résumé</h2>
+                        <p>L'<strong>Apprentissage Automatique (ML)</strong> peut offrir de nouvelles capacités dans les systèmes aéroportés. Cependant, comme toute partie des systèmes aéroportés, les systèmes basés sur le <strong>ML</strong> devront garantir leur fonctionnement sûr. Ainsi, leur développement devra être démontré conforme aux directives adéquates. Jusqu'à présent, l'Agence de la sécurité aérienne de l'Union européenne (<strong>EASA</strong>) a publié un document de concept et un groupe <strong>EUROCAE/SAE</strong> prépare l'<strong>ED-324</strong>. Les deux approches définissent des objectifs de haut niveau pour confirmer que le modèle <strong>ML</strong> remplit sa fonction prévue et maintient les performances d'entraînement dans l'environnement cible.</p>
+                        <p>Cet article vise à clarifier la différence entre un modèle <strong>ML</strong> et sa description non ambiguë correspondante, appelée <strong>Description du Modèle d'Apprentissage Automatique (MLMD)</strong>. Il affine ensuite la notion essentielle de préservation de la sémantique pour assurer la réplication précise du modèle. Nous appliquons nos contributions à plusieurs cas d'usage industriels pour construire et comparer plusieurs modèles cibles.</p>
+                    `,
+                    intro: `
+                        <h2>I. Introduction</h2>
+                        <p>L'<strong>Apprentissage Automatique (ML)</strong> a gagné en considération même dans les systèmes avioniques aéroportés. Cependant, l'introduction d'algorithmes <strong>ML</strong> dans les systèmes embarqués avioniques défie les pratiques établies de l'industrie de l'assurance du développement. Cela a conduit à l'émergence de nouveaux processus d'assurance du développement, comme indiqué dans les directives de l'<strong>EASA</strong> <span class="citation" data-ref="10">[10]</span> et le projet de l'<strong>ED-324</strong> encore à paraître, avec des documents publiquement disponibles <span class="citation" data-ref="14">[14]</span>, <span class="citation" data-ref="24">[24]</span>, <span class="citation" data-ref="23">[23]</span>. Les deux documents sont limités aux niveaux d'assurance de conception liés aux conditions de défaillance les moins critiques : Majeures et Mineures.</p>
+                        <p><strong>Approche des directives.</strong> Ces documents traitent des modèles <strong>ML</strong> supervisés, entraînés hors ligne, et promeuvent un cycle de vie de développement en forme de W (décrit dans la Figure 1). Il se compose grossièrement de deux phases principales : 1) la conception de la fonction prévue (premier cycle en V), et 2) sa réplication dans le <strong>Modèle Cible (TIM)</strong> (second cycle en V). Le <strong>Modèle Cible (TIM)</strong> capture à la fois la représentation du modèle <strong>ML</strong> implémenté et l'environnement cible, c'est-à-dire la plate-forme matérielle et logicielle et sa configuration utilisée pour exécuter le modèle. Le second cycle en V implémente d'abord la <strong>Description du Modèle d'Apprentissage Automatique (MLMD)</strong> dans un <strong>TIM</strong>, tout en assurant la préservation de la sémantique du modèle entraîné hors ligne. La vérification évalue ensuite la réplication correcte du <strong>TFM</strong> par l'implémentation.</p>
+                        <figure>
+                            <img src="https://placehold.co/600x300/e0e7ff/3730a3?text=Fig.+1:+Cycle+de+vie+en+W+ED-324" alt="Figure 1: Cycle de vie de développement en W de l'ED-324" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 1:</strong> Cycle de vie de développement en W de l'ED-324</figcaption>
+                        </figure>
+                        <p><strong>Objectif de l'article.</strong> Cet article se concentre sur la construction de la <strong>MLMD</strong> comme pont entre les deux phases. Le <strong>Modèle du Cadre d'Entraînement (TFM)</strong> résulte de l'entraînement et de la vérification hors ligne. Il est exprimé en utilisant la représentation interne d'un cadre d'entraînement. En revanche, la <strong>MLMD</strong> est un modèle <strong>ML</strong> non volatil et sémantiquement défini, qui est indépendant des préoccupations d'entraînement, c'est-à-dire que la <strong>MLMD</strong> ne contient pas de taux d'apprentissage ou de fonction de perte. Pour construire la <strong>MLMD</strong>, il est essentiel d'identifier et de formaliser d'abord le comportement du <strong>TFM</strong> ainsi que les propriétés qui doivent être maintenues pendant l'implémentation.</p>
+                    `,
+                    how_to_describe: `
+                        <h2>II. Comment Décrire un Modèle ML</h2>
+                        <p>L'<strong>ED-324</strong> définit un processus d'assurance de la conception pour concevoir et développer des systèmes basés sur le <strong>ML</strong>. Une attente importante est de s'assurer que le <strong>TIM</strong> reproduit le comportement du <strong>TFM</strong> et les propriétés observées à la fin de la conception, et de faciliter sa vérification. L'approche proposée par la norme est d'introduire une description intermédiaire, la <strong>MLMD</strong>, entre les deux cycles en V. Le but de la <strong>MLMD</strong> est de décrire les modèles <strong>ML</strong> de manière non ambiguë, afin que l'implémentation puisse commencer avec une spécification complète.</p>
+                        <h3>A. Comprendre quelles propriétés préserver</h3>
+                        <p>D'abord, décrivons brièvement ce qui est fait lors de la vérification du premier V. Un modèle <strong>ML</strong> est censé remplir certaines exigences et propriétés telles que la stabilité, la généralisation, la performance, la robustesse. En pratique, plusieurs métriques sont utilisées pour vérifier si ces propriétés sont respectées, et pour identifier les conditions dans lesquelles ces propriétés sont remplies (par exemple, la plage de données d'entrée). La Figure 2 met en évidence cette vérification par les scientifiques des données à la fin du premier V.</p>
+                        <figure>
+                            <img src="https://placehold.co/500x250/e0e7ff/3730a3?text=Fig.+2:+Vérification+TFM" alt="Figure 2: Vérification TFM avec un ensemble de métriques" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 2:</strong> Vérification TFM avec un ensemble de métriques</figcaption>
+                        </figure>
+                        <h3>B. Objectifs de l'ED-324 relatifs à la MLMD</h3>
+                        <p>Le second V de la forme en W vise à préserver les propriétés satisfaites par le <strong>TFM</strong>. À cette fin, l'<strong>ED-324</strong> s'appuie sur la définition de la <strong>MLMD</strong> comme un pont entre la conception du modèle <strong>ML</strong> (<strong>TFM</strong>) et l'implémentation du modèle <strong>ML</strong>, que nous appelons le <strong>Modèle Cible (TIM)</strong>. Le but de la <strong>MLMD</strong> est de s'assurer que le <strong>TIM</strong> reproduit le comportement observé du <strong>TFM</strong>, avec l'intention qu'ils satisfassent tous deux les mêmes propriétés. Ceci est illustré dans la Figure 3.</p>
+                         <figure>
+                            <img src="https://placehold.co/500x200/e0e7ff/3730a3?text=Fig.+3:+Propriétés+MLMD" alt="Figure 3: MLMD pour garantir les propriétés du modèle ML" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 3:</strong> MLMD pour garantir les propriétés du modèle ML</figcaption>
+                        </figure>
+                    `,
+                    applicability: `
+                        <h2>III. Applicabilité de l'Approche</h2>
+                        <p>Dans cette section, nous détaillons l'approche proposée dans la Section II-D sur différentes métriques pour montrer qu'il est toujours possible de construire εM et gM. Nous nous concentrons ensuite sur la manière de construire une <strong>MLMD</strong> à un niveau de sémantique de réplication SLx. Nous choisissons de nous appuyer sur le format <strong>ONNX</strong>, l'un des plus largement pris en charge par les cadres d'entraînement populaires dans la communauté <strong>ML</strong>. Cela fait d'<strong>ONNX</strong> un candidat de choix en tant que format <strong>MLMD</strong> soutenant l'Objectif 1.</p>
+                        <h3>A. Construction de gM</h3>
+                        <p>Nous discutons de diverses métriques pour les tâches de régression, de classification et de détection d'objets.</p>
+                        <figure>
+                            <img src="https://placehold.co/600x250/e0e7ff/3730a3?text=Fig.+5:+Formule+gM+pour+la+régression" alt="Figure 5: Formule gM pour les principales métriques de tâches de régression" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 5:</strong> Formule gM pour les principales métriques de tâches de régression</figcaption>
+                        </figure>
+                        <figure>
+                            <img src="https://placehold.co/400x300/e0e7ff/3730a3?text=Fig.+6:+métrique+min+IoU" alt="Figure 6: métrique min IoU" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 6:</strong> métrique min IoU</figcaption>
+                        </figure>
+                        <h3>B. ONNX pour supporter la MLMD</h3>
+                        <p><strong>ONNX</strong> est un framework open source spécialisé dans la phase d'inférence. Il repose sur trois composants : le noyau <strong>ONNX</strong> pour décrire un modèle <strong>ML</strong>, <strong>ONNX Runtime (ORT)</strong> pour exécuter les modèles <strong>ONNX</strong>, et le script <strong>ONNX</strong> pour transformer les descriptions de modèles <strong>ML</strong>.</p>
+                        <figure>
+                            <img src="https://placehold.co/500x400/e0e7ff/3730a3?text=Fig.+7:+Modèle+UML+ONNX" alt="Figure 7: Modèle UML simplifié d'ONNX" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 7:</strong> Modèle UML simplifié d'ONNX</figcaption>
+                        </figure>
+                        <h3>C. Méthodes de construction de la MLMD</h3>
+                        <p>Nous illustrons dans la Figure 8 les différentes couches impliquées dans la dérivation d'un <strong>TIM</strong>. Les sommets du graphe sont la représentation du modèle <strong>ML</strong> et les environnements, et les arêtes sont des transformations SL.</p>
+                        <figure>
+                            <img src="https://placehold.co/700x500/e0e7ff/3730a3?text=Fig.+8:+Construction+et+Implémentation+MLMD" alt="Figure 8: Construction et Implémentation de la MLMD" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 8:</strong> Construction et Implémentation de la MLMD</figcaption>
+                        </figure>
+                    `,
+                    setup: `
+                        <h2>IV. Configuration Expérimentale</h2>
+                        <p>Pour évaluer la préservation sémantique des modèles <strong>ML</strong> (§ II-C), nous considérons des cas d'usage industriels et leur déploiement en tant que <strong>TIM</strong>. Nous automatisons davantage les méthodes de construction et de réplication de la <strong>MLMD</strong> en utilisant des outils disponibles dans la littérature pour évaluer comment dériver et vérifier un <strong>TIM</strong> SL3 à partir d'un <strong>TFM</strong>. Cela se traduit par un certain nombre de configurations expérimentales, chacune notée comme suit : <code>mdl-exp-repr-gen-env</code>.</p>
+                        <h3>A. Modèles ML (mdl)</h3>
+                        <p>Nous présentons deux cas d'usage, destinés à effectuer une tâche de régression pour l'avionique d'hélicoptère. Les <strong>TFM</strong> pour les cas d'usage sont spécifiés dans le framework d'entraînement KERAS.</p>
+                        <figure>
+                            <img src="https://placehold.co/700x250/e0e7ff/3730a3?text=Fig.+9:+Architecture+des+modèles+ML" alt="Figure 9: Architecture des modèles ML des cas d'usage" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 9:</strong> Architecture des modèles ML des cas d'usage</figcaption>
+                        </figure>
+                        <h3>B. MLMD ONNX (exp)</h3>
+                        <p>Une fois le <strong>TFM</strong> entraîné, la <strong>MLMD</strong> est construite à l'aide de l'exportateur hérité de KERAS vers <strong>ONNX</strong>. Nous appliquons ensuite des transformations automatisées ou manuelles au modèle exporté à l'aide du script <strong>ONNX</strong>.</p>
+                        <h3>C. Générateurs de code (gen et repr)</h3>
+                        <p>Nous considérons des générateurs de code open source pour générer du code C dans notre évaluation : onnx2c et acetone. Nous avons également conçu manuellement un modèle ANSYS Scade 6 pour le cas d'usage lstm.</p>
+                        <h3>D. Environnement d'exécution (env)</h3>
+                        <p>Nous considérons deux environnements d'exécution pour notre évaluation, un serveur Intel basé sur Linux (x86), et un NXP T1042 PowerPC (t1042).</p>
+                    `,
+                    results: `
+                        <h2>V. Résultats</h2>
+                        <p>L'évaluation de la préservation sémantique pour les configurations considérées repose sur l'approche proposée dans la Section III. Nous considérons d'abord pour chaque cas d'usage les propriétés satisfaites par le <strong>TFM</strong>, et le budget correspondant gM pour diverses métriques M, afin de calculer l'erreur acceptable εM entre le <strong>TFM</strong> et le <strong>TIM</strong>.</p>
+                        <h3>A. Cas d'usage 1stm</h3>
+                        <figure>
+                            <img src="https://placehold.co/700x300/e0e7ff/3730a3?text=Fig.+10:+FDR+des+erreurs+(TFM+vs+Vérité+Terrain)" alt="Figure 10: Fonction de répartition cumulative des erreurs entre le TFM et la vérité terrain" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 10:</strong> Fonction de répartition cumulative des erreurs entre le TFM et la vérité terrain</figcaption>
+                        </figure>
+                        <div class="table-container">
+                            <h4>Tableau I: Métriques de régression pour 1stm</h4>
+                            <table>
+                                <thead><tr><th>M</th><th>M(1)</th><th>RM</th><th>εM</th></tr></thead>
+                                <tbody>
+                                    <tr><td>MAX</td><td>0.55</td><td>&lt;1.0</td><td>&lt;0.44</td></tr>
+                                    <tr><td>MAE</td><td>0.053</td><td>0.07</td><td>&lt;0.017</td></tr>
+                                    <tr><td>R²</td><td>0.841</td><td>&gt;0.83</td><td>&lt;0.008</td></tr>
+                                    <tr><td>EVS</td><td>0.849</td><td>&ge;0.83</td><td>&lt;0.013</td></tr>
+                                    <tr><td>Biais</td><td>-0.017</td><td>&le;0.03</td><td>&le;0.012</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <figure>
+                            <img src="https://placehold.co/700x300/e0e7ff/3730a3?text=Fig.+11:+FDR+des+erreurs+(TIM+vs+TFM)" alt="Figure 11: Fonction de répartition cumulative des erreurs entre le TFM et le TIM" class="mx-auto rounded-lg shadow-md">
+                            <figcaption><strong>Figure 11:</strong> Fonction de répartition cumulative des erreurs entre le TFM et le TIM</figcaption>
+                        </figure>
+                        <h3>B. Cas d'usage linear</h3>
+                        <div class="table-container">
+                            <h4>Tableau III: Métriques de régression pour linear</h4>
+                            <table>
+                                <thead><tr><th>M</th><th>M(1)</th><th>RM</th><th>εM</th></tr></thead>
+                                <tbody>
+                                    <tr><td>MAE</td><td>0.033</td><td>&lt;0.06</td><td>&lt;0.026</td></tr>
+                                    <tr><td>MSE</td><td>0.002</td><td>&lt;0.01</td><td>&lt;0.088</td></tr>
+                                    <tr><td>R²</td><td>0.821</td><td>&ge;0.8</td><td>&le;0.015</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-container">
+                            <h4>Tableau IV: Métriques de réplication pour linear avec εM=0.015</h4>
+                            <table>
+                                <thead><tr><th>TIM</th><th>max(|εi|)</th><th>&le;εM</th></tr></thead>
+                                <tbody>
+                                    <tr><td>-*-FP32-ort-x86</td><td>3e-7</td><td>O</td></tr>
+                                    <tr><td>-*-FP32-onnx2c-t1042</td><td>7e-7</td><td>O</td></tr>
+                                    <tr><td>-*-FP16-ort-x86</td><td>2e-3</td><td>O</td></tr>
+                                    <tr><td>-*-INT16-ort-x86</td><td>2e-3</td><td>O</td></tr>
+                                    <tr><td>-*-INT12-ort-x86</td><td>3e-2</td><td>N</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    `,
+                    related_work: `
+                        <h2>VI. Travaux Connexes</h2>
+                        <p>Les outils d'exportation de modèles sont conçus pour traduire la sémantique du framework d'entraînement dans la sémantique de la <strong>MLMD</strong>. Cependant, des étapes de traduction variées ou répétées peuvent entraîner de nombreux problèmes de compatibilité et de réplication, rapportés dans l'enquête <span class="citation" data-ref="21">[21]</span>. <span class="citation" data-ref="18">[18]</span> a en outre souligné le compromis entre les performances d'inférence du modèle et la précision lors de l'utilisation d'accélérateurs matériels.</p>
+                        <p>Dans la communauté <strong>ML</strong>, le format d'échange <strong>ONNX</strong> est l'un des plus largement pris en charge par les frameworks d'entraînement populaires. Des travaux antérieurs ont construit des <strong>MLMD</strong> avec NNEF <span class="citation" data-ref="17">[17]</span> et <strong>ONNX</strong> (Open Neural Network eXchange) <span class="citation" data-ref="15">[15]</span>. Cependant, ces approches n'ont pas exploré comment exporter un <strong>TFM</strong>, et comment vérifier sa conformité aux objectifs de l'<strong>ED-324</strong>.</p>
+                        <p>De nombreux frameworks peuvent générer du code C, C++ ou CUDA compatible avec le cycle de vie de développement des systèmes aéroportés à partir d'une <strong>MLMD</strong> <span class="citation" data-ref="31">[31]</span>, <span class="citation" data-ref="5">[5]</span>, <span class="citation" data-ref="28">[28]</span>. En effet, conformément à la directive héritée DO-178/ED-12, la production de code source à partir de la <strong>MLMD</strong> est une approche favorable à la certification.</p>
+                    `,
+                    conclusion: `
+                        <h2>VII. Conclusion</h2>
+                        <p>Dans le développement avionique traditionnel, l'industrialisation et la certification exigent que la vérification des exigences ou des propriétés soit effectuée dans le <strong>TIM</strong>, à moins qu'un argument ne soit fourni pour justifier que la vérification effectuée sur un environnement d'exécution différent est toujours valide dans le <strong>TIM</strong>. Un argument pourrait être une réplication bit à bit entre le <strong>TFM</strong> et le <strong>TIM</strong>, ce qui est une contrainte assez difficile sur le développement. Pour éviter cette contrainte, nous proposons une définition de la préservation de la sémantique du modèle <strong>ML</strong> et une méthodologie de vérification de soutien, basées sur des métriques <strong>ML</strong> de l'état de l'art. Cette méthode repose sur deux processus indépendants : 1) la vérification des métriques du <strong>TFM</strong> incluant le budget gM, et en utilisant un jeu de tests incluant la vérité terrain, 2) la vérification que les prédictions du <strong>TIM</strong> s'inscrivent dans la marge d'erreur εM en utilisant un ensemble choisi de prédictions du <strong>TFM</strong>. Ce second processus ne nécessite aucune connaissance des métriques, ni de la vérité terrain. Il prend en entrée la <strong>MLMD</strong> incluant εM. Son objectif est de démontrer une borne supérieure des erreurs cumulées d'arrondi et d'approximations de l'algorithme.</p>
+                    `,
+                    references: `
+                        <h2>Références</h2>
+                        <p>[Traduction des références]</p>
+                    `
+                }
+            },
+            // --- GERMAN (Placeholder) ---
+            de: {
+                title: "Implementierung von luftgestützten ML-Modellen mit Semantikerhaltung",
+                authors: "Nicolas Valot¹, Louis Fabre¹, Benjamin Lesage², Ammar Mechouche¹, Claire Pagetti² (¹Airbus Helicopters, ²ONERA)",
+                audio: {
+                    title: `Audio-Vortrag: DeepDive - Implementierung von luftgestützten ML-Modellen...`,
+                    note: "Hinweis: Dies ist eine Platzhalter-Audiodatei. Benutzerdefinierte Audiodateien in jeder Sprache sollten bereitgestellt werden."
+                },
+                nav: {
+                    abstract: "Zusammenfassung",
+                    intro: "I. Einleitung",
+                    how_to_describe: "II. Wie man ein ML-Modell beschreibt",
+                    applicability: "III. Anwendbarkeit des Ansatzes",
+                    setup: "IV. Experimenteller Aufbau",
+                    results: "V. Ergebnisse",
+                    related_work: "VI. Verwandte Arbeiten",
+                    conclusion: "VII. Fazit",
+                    references: "Referenzen",
+                },
+                sections: {
+                    abstract: `<h2>Zusammenfassung</h2><p><strong>Maschinelles Lernen (ML)</strong> kann neue Fähigkeiten in luftgestützten Systemen bieten. Wie jeder Teil von luftgestützten Systemen müssen jedoch auch <strong>ML</strong>-basierte Systeme ihren sicheren Betrieb gewährleisten. Daher muss nachgewiesen werden, dass ihre Entwicklung den entsprechenden Leitlinien entspricht. Bislang hat die Flugsicherheitsagentur der Europäischen Union (<strong>EASA</strong>) ein Konzeptpapier veröffentlicht, und eine <strong>EUROCAE/SAE</strong>-Gruppe bereitet <strong>ED-324</strong> vor. Beide Ansätze skizzieren übergeordnete Ziele, um zu bestätigen, dass das <strong>ML</strong>-Modell seine beabsichtigte Funktion erfüllt und die Trainingsleistung in der Zielumgebung beibehält.</p><p>Das Papier zielt darauf ab, den Unterschied zwischen einem <strong>ML</strong>-Modell und seiner entsprechenden eindeutigen Beschreibung, der <strong>Machine Learning Model Description (MLMD)</strong>, zu klären. Es verfeinert dann den wesentlichen Begriff der Semantikerhaltung, um die genaue Replikation des Modells zu gewährleisten. Wir wenden unsere Beiträge auf mehrere industrielle Anwendungsfälle an, um mehrere Zielmodelle zu erstellen und zu vergleichen.</p>`,
+                    intro: `<h2>I. Einleitung</h2><p><strong>Maschinelles Lernen (ML)</strong> hat auch in der Avionik von Flugzeugen zunehmend an Bedeutung gewonnen. Die Einführung von <strong>ML</strong>-Algorithmen in eingebettete Avioniksysteme stellt jedoch die etablierten Praktiken der Entwicklungs-Sicherungs-Industrie in Frage. Dies hat zur Entstehung neuer Entwicklungs-Sicherungs-Prozesse geführt, wie sie in den <strong>EASA</strong>-Leitlinien <span class="citation" data-ref="10">[10]</span> und dem noch zu veröffentlichenden Entwurf des <strong>ED-324</strong> mit öffentlich verfügbarem Material <span class="citation" data-ref="14">[14]</span>, <span class="citation" data-ref="24">[24]</span>, <span class="citation" data-ref="23">[23]</span> dargelegt sind. Beide Dokumente beschränken sich auf die Design-Assurance-Level, die sich auf die am wenigsten kritischen Fehlerbedingungen beziehen: Major und Minor.</p><p><strong>Ansatz der Leitlinien.</strong> Diese Dokumente befassen sich mit überwachten, offline trainierten <strong>ML</strong>-Modellen und fördern einen W-förmigen Entwicklungslebenszyklus (dargestellt in Abbildung 1). Er besteht grob aus zwei Hauptphasen: 1) dem Entwurf der beabsichtigten Funktion (erster V-Zyklus) und 2) ihrer Replikation im <strong>Zielmodell (TIM)</strong> (zweiter V-Zyklus). Das <strong>Zielmodell (TIM)</strong> erfasst sowohl die Darstellung des implementierten <strong>ML</strong>-Modells als auch die Zielumgebung, d.h. die Hardware- und Softwareplattform und ihre Konfiguration, die zur Ausführung des Modells verwendet wird. Der zweite V-Zyklus implementiert zunächst die <strong>Machine Learning Model Description (MLMD)</strong> in ein <strong>TIM</strong>, während die Semantikerhaltung des offline trainierten Modells sichergestellt wird. Die Verifizierung bewertet dann die korrekte Replikation des <strong>TFM</strong> durch die Implementierung.</p><figure><img src="https://placehold.co/600x300/e0e7ff/3730a3?text=Abb.+1:+ED-324+W-Form+Lebenszyklus" alt="Abbildung 1: ED-324 W-Form Entwicklungslebenszyklus" class="mx-auto rounded-lg shadow-md"><figcaption><strong>Abbildung 1:</strong> ED-324 W-Form Entwicklungslebenszyklus</figcaption></figure><p><strong>Fokus des Papiers.</strong> Dieses Papier konzentriert sich auf die Erstellung der <strong>MLMD</strong> als Brücke zwischen den beiden Phasen. Das <strong>Training Framework Model (TFM)</strong> resultiert aus dem Offline-Training und der Verifizierung. Es wird unter Verwendung der internen Darstellung eines Trainings-Frameworks ausgedrückt. Im Gegensatz dazu ist die <strong>MLMD</strong> ein nicht-flüchtiges und semantisch definiertes <strong>ML</strong>-Modell, das von Trainingsbelangen unabhängig ist, d.h. die <strong>MLMD</strong> enthält keine Lernrate oder Verlustfunktion. Um die <strong>MLMD</strong> zu erstellen, ist es unerlässlich, zunächst das <strong>TFM</strong>-Verhalten sowie die Eigenschaften, die während der Implementierung beibehalten werden müssen, zu identifizieren und zu formalisieren.</p>`,
+                    how_to_describe: `<h2>II. Wie man ein ML-Modell beschreibt</h2><p><strong>ED-324</strong> definiert einen Design-Assurance-Prozess zur Konzeption und Entwicklung von <strong>ML</strong>-basierten Systemen. Eine wichtige Erwartung ist sicherzustellen, dass das <strong>TIM</strong> das <strong>TFM</strong>-Verhalten und die am Ende des Designs beobachteten Eigenschaften reproduziert und seine Verifizierung erleichtert. Der vom Standard vorgeschlagene Ansatz besteht darin, eine Zwischenbeschreibung, die <strong>MLMD</strong>, zwischen den beiden V-Zyklen einzuführen. Der Zweck der <strong>MLMD</strong> ist es, <strong>ML</strong>-Modelle eindeutig zu beschreiben, sodass die Implementierung mit einer vollständigen Spezifikation beginnen kann.</p><h3>A. Verstehen, welche Eigenschaften zu erhalten sind</h3><p>Zuerst skizzieren wir kurz, was während der Verifizierung des ersten V getan wird. Von einem <strong>ML</strong>-Modell wird erwartet, dass es einige Anforderungen und Eigenschaften wie Stabilität, Generalisierung, Leistung und Robustheit erfüllt. Praktisch werden mehrere Metriken verwendet, um zu überprüfen, ob diese Eigenschaften erfüllt sind, und um die Bedingungen zu identifizieren, unter denen diese Eigenschaften erfüllt sind (z. B. Bereich der Eingabedaten). Abbildung 2 hebt diese Verifizierung durch die Datenwissenschaftler am Ende des ersten V hervor.</p><figure><img src="https://placehold.co/500x250/e0e7ff/3730a3?text=Abb.+2:+TFM-Verifizierung" alt="Abbildung 2: TFM-Verifizierung mit einem Satz von Metriken" class="mx-auto rounded-lg shadow-md"><figcaption><strong>Abbildung 2:</strong> TFM-Verifizierung mit einem Satz von Metriken</figcaption></figure><h3>B. ED-324-Ziele in Bezug auf MLMD</h3><p>Das zweite V der W-Form zielt darauf ab, die vom <strong>TFM</strong> erfüllten Eigenschaften zu erhalten. Zu diesem Zweck stützt sich <strong>ED-324</strong> auf die Definition der <strong>MLMD</strong> als Brücke zwischen dem <strong>ML</strong>-Modellentwurf (<strong>TFM</strong>) und der <strong>ML</strong>-Modellimplementierung, die wir als <strong>Zielmodell (TIM)</strong> bezeichnen. Der Zweck der <strong>MLMD</strong> ist es sicherzustellen, dass das <strong>TIM</strong> das beobachtete Verhalten des <strong>TFM</strong> reproduziert, mit der Absicht, dass beide die gleichen Eigenschaften erfüllen. Dies wird in Abbildung 3 hervorgehoben.</p><figure><img src="https://placehold.co/500x200/e0e7ff/3730a3?text=Abb.+3:+MLMD-Eigenschaften" alt="Abbildung 3: MLMD zur Gewährleistung der ML-Modelleigenschaften" class="mx-auto rounded-lg shadow-md"><figcaption><strong>Abbildung 3:</strong> MLMD zur Gewährleistung der ML-Modelleigenschaften</figcaption></figure>`,
+                    applicability: `<h2>III. Anwendbarkeit des Ansatzes</h2><p>In diesem Abschnitt detaillieren wir den in Abschnitt II-D vorgeschlagenen Ansatz für verschiedene Metriken, um zu zeigen, dass es immer möglich ist, εM und gM zu konstruieren. Wir konzentrieren uns dann darauf, wie man eine <strong>MLMD</strong> auf einem Replikations-Semantik-Level SLx erstellt. Wir entscheiden uns für das <strong>ONNX</strong>-Format, eines der am weitesten verbreiteten Formate in der <strong>ML</strong>-Community, das von populären Trainings-Frameworks unterstützt wird. Dies macht <strong>ONNX</strong> zu einem erstklassigen Kandidaten als <strong>MLMD</strong>-Format, das Ziel 1 unterstützt.</p>`,
+                    setup: `<h2>IV. Experimenteller Aufbau</h2><p>Um die semantische Erhaltung von <strong>ML</strong>-Modellen (§ II-C) zu bewerten, betrachten wir industrielle Anwendungsfälle und deren Einsatz als <strong>TIM</strong>. Wir automatisieren weiterhin die Methoden zur Erstellung und Replikation von <strong>MLMD</strong> mithilfe von in der Literatur verfügbaren Werkzeugen, um zu bewerten, wie SL3 <strong>TIM</strong> von einem <strong>TFM</strong> abgeleitet und verifiziert werden kann. Dies führt zu einer Reihe von experimentellen Konfigurationen, die jeweils wie folgt bezeichnet werden: <code>mdl-exp-repr-gen-env</code>.</p>`,
+                    results: `<h2>V. Ergebnisse</h2><p>Die Bewertung der Semantikerhaltung für die betrachteten Konfigurationen stützt sich auf den in Abschnitt III vorgeschlagenen Ansatz. Wir betrachten zunächst für jeden Anwendungsfall die vom <strong>TFM</strong> erfüllten Eigenschaften und das entsprechende Budget gM für verschiedene Metriken M, um den akzeptablen Fehler εM zwischen dem <strong>TFM</strong> und dem <strong>TIM</strong> zu berechnen.</p>`,
+                    related_work: `<h2>VI. Verwandte Arbeiten</h2><p>Modell-Exporter-Tools sind darauf ausgelegt, die Semantik des Trainings-Frameworks in die <strong>MLMD</strong>-Semantik zu übersetzen. Jedoch können vielfältige oder wiederholte Übersetzungsschritte zu zahlreichen Kompatibilitäts- und Replikationsproblemen führen, wie in der Umfrage <span class="citation" data-ref="21">[21]</span> berichtet wird. <span class="citation" data-ref="18">[18]</span> hob ferner den Kompromiss zwischen der Inferenzleistung des Modells und der Präzision bei der Verwendung von Hardware-Beschleunigern hervor.</p>`,
+                    conclusion: `<h2>VII. Fazit</h2><p>In der traditionellen Avionikentwicklung erfordern Industrialisierung und Zertifizierung, dass die Überprüfung von Anforderungen oder Eigenschaften im <strong>TIM</strong> durchgeführt wird, es sei denn, es wird ein Argument geliefert, um zu rechtfertigen, dass die Überprüfung, die in einer anderen Ausführungsumgebung durchgeführt wurde, im <strong>TIM</strong> immer noch gültig ist. Ein Argument könnte eine bit-genaue Replikation zwischen <strong>TFM</strong> und dem <strong>TIM</strong> sein, was eine ziemlich harte Anforderung an die Entwicklung darstellt. Um diese Einschränkung zu vermeiden, schlagen wir eine Definition der Semantikerhaltung von <strong>ML</strong>-Modellen und eine unterstützende Verifizierungsmethodik vor, die auf modernsten <strong>ML</strong>-Metriken basiert.</p>`,
+                    references: `<h2>Referenzen</h2><p>[Deutsche Übersetzung der Referenzen]</p>`
+                }
+            },
+            // --- SPANISH (Placeholder) ---
+            es: {
+                title: "Implementación de modelos ML aéreos con preservación semántica",
+                authors: "Nicolas Valot¹, Louis Fabre¹, Benjamin Lesage², Ammar Mechouche¹, Claire Pagetti² (¹Airbus Helicopters, ²ONERA)",
+                audio: {
+                    title: `Lectura de Audio: DeepDive - Implementación de modelos ML aéreos...`,
+                    note: "Nota: Este es un archivo de audio de marcador de posición. Se deben proporcionar archivos de audio personalizados en cada idioma."
+                },
+                nav: {
+                    abstract: "Resumen",
+                    intro: "I. Introducción",
+                    how_to_describe: "II. Cómo Describir un Modelo ML",
+                    applicability: "III. Aplicabilidad del Enfoque",
+                    setup: "IV. Configuración Experimental",
+                    results: "V. Resultados",
+                    related_work: "VI. Trabajo Relacionado",
+                    conclusion: "VII. Conclusión",
+                    references: "Referencias",
+                },
+                sections: {
+                    abstract: `<h2>Resumen</h2><p>El <strong>Aprendizaje Automático (ML)</strong> puede ofrecer nuevas capacidades en los sistemas aéreos. Sin embargo, como cualquier parte de los sistemas aéreos, los sistemas basados en <strong>ML</strong> deberán garantizar su operación segura. Por lo tanto, se deberá demostrar que su desarrollo cumple con la guía adecuada. Hasta ahora, la Agencia de Seguridad Aérea de la Unión Europea (<strong>EASA</strong>) ha publicado un documento conceptual y un grupo <strong>EUROCAE/SAE</strong> está preparando <strong>ED-324</strong>. Ambos enfoques delinean objetivos de alto nivel para confirmar que el modelo <strong>ML</strong> logra su función prevista y mantiene el rendimiento del entrenamiento en el entorno objetivo.</p><p>El artículo tiene como objetivo aclarar la diferencia entre un modelo <strong>ML</strong> y su descripción inequívoca correspondiente, denominada <strong>Descripción del Modelo de Aprendizaje Automático (MLMD)</strong>. Luego refina la noción esencial de preservación semántica para asegurar la replicación precisa del modelo. Aplicamos nuestras contribuciones a varios casos de uso industriales para construir y comparar varios modelos objetivo.</p>`,
+                    intro: `<h2>I. Introducción</h2><p>El <strong>Aprendizaje Automático (ML)</strong> ha ganado una creciente consideración incluso en los sistemas de aviónica aerotransportada. Sin embargo, la introducción de algoritmos de <strong>ML</strong> en los sistemas embebidos de aviónica desafía las prácticas establecidas de la industria de aseguramiento del desarrollo. Por lo tanto, ha llevado a la aparición de nuevos procesos de aseguramiento del desarrollo, como se describe en la guía de <strong>EASA</strong> <span class="citation" data-ref="10">[10]</span> y el borrador aún por publicar de la <strong>ED-324</strong>, con material disponible públicamente <span class="citation" data-ref="14">[14]</span>, <span class="citation" data-ref="24">[24]</span>, <span class="citation" data-ref="23">[23]</span>. Ambos documentos se limitan a los niveles de aseguramiento del diseño relacionados con las condiciones de falla menos críticas: Mayor y Menor.</p><p><strong>Enfoque de la guía.</strong> Estos documentos abordan modelos de <strong>ML</strong> supervisados y entrenados fuera de línea y promueven un ciclo de vida de desarrollo en forma de W (esbozado en la Figura 1). Consiste aproximadamente en dos fases principales: 1) el diseño de la función prevista (primer ciclo en V), y 2) su replicación en el <strong>Modelo Objetivo (TIM)</strong> (segundo ciclo en V). El <strong>Modelo Objetivo (TIM)</strong> captura tanto la representación del modelo de <strong>ML</strong> implementado como el entorno objetivo, es decir, la plataforma de hardware y software y su configuración utilizada para ejecutar el modelo. El segundo ciclo en V primero implementa la <strong>Descripción del Modelo de Aprendizaje Automático (MLMD)</strong> en un <strong>TIM</strong>, al tiempo que garantiza la preservación semántica del modelo entrenado fuera de línea. La verificación luego evalúa la correcta replicación del <strong>TFM</strong> por la implementación.</p><figure><img src="https://placehold.co/600x300/e0e7ff/3730a3?text=Fig.+1:+Ciclo+de+Vida+en+W+de+ED-324" alt="Figura 1: Ciclo de vida de desarrollo en forma de W de ED-324" class="mx-auto rounded-lg shadow-md"><figcaption><strong>Figura 1:</strong> Ciclo de vida de desarrollo en forma de W de ED-324</figcaption></figure><p><strong>Enfoque del artículo.</strong> Este artículo se centra en la construcción de la <strong>MLMD</strong> como el puente entre las dos fases. El <strong>Modelo del Marco de Entrenamiento (TFM)</strong> resulta del entrenamiento y la verificación fuera de línea. Se expresa utilizando la representación interna de un marco de entrenamiento. Por el contrario, la <strong>MLMD</strong> es un modelo de <strong>ML</strong> no volátil y semánticamente definido, que es independiente de las preocupaciones del entrenamiento, es decir, la <strong>MLMD</strong> no contiene tasa de aprendizaje o función de pérdida. Para construir la <strong>MLMD</strong>, es esencial primero identificar y formalizar el comportamiento del <strong>TFM</strong>, así como las propiedades que deben mantenerse durante la implementación.</p>`,
+                    how_to_describe: `<h2>II. Cómo Describir un Modelo ML</h2><p><strong>ED-324</strong> define un proceso de aseguramiento del diseño para concebir y desarrollar sistemas basados en <strong>ML</strong>. Una expectativa importante es asegurar que el <strong>TIM</strong> reproduzca el comportamiento del <strong>TFM</strong> y las propiedades observadas al final del diseño, y facilitar su verificación. El enfoque propuesto por el estándar es introducir una descripción intermedia, la <strong>MLMD</strong>, entre los dos ciclos en V. El propósito de la <strong>MLMD</strong> es describir los modelos de <strong>ML</strong> de manera inequívoca, para que la implementación pueda comenzar con una especificación completa.</p><h3>A. Entender qué propiedades preservar</h3><p>Primero, describamos brevemente qué se hace durante la verificación del primer V. Se espera que un modelo de <strong>ML</strong> cumpla con algunos requisitos y propiedades como estabilidad, generalización, rendimiento, robustez. En la práctica, se utilizan varias métricas para verificar si se cumplen esas propiedades y para identificar las condiciones bajo las cuales se cumplen (por ejemplo, el rango de datos de entrada). La Figura 2 destaca esta verificación por parte de los científicos de datos al final del primer V.</p><figure><img src="https://placehold.co/500x250/e0e7ff/3730a3?text=Fig.+2:+Verificación+del+TFM" alt="Figura 2: Verificación del TFM con un conjunto de métricas" class="mx-auto rounded-lg shadow-md"><figcaption><strong>Figura 2:</strong> Verificación del TFM con un conjunto de métricas</figcaption></figure><h3>B. Objetivos de ED-324 relacionados con la MLMD</h3><p>El segundo V de la forma en W tiene como objetivo preservar las propiedades satisfechas por el <strong>TFM</strong>. Para este propósito, <strong>ED-324</strong> se basa en la definición de la <strong>MLMD</strong> como un puente entre el diseño del modelo de <strong>ML</strong> (<strong>TFM</strong>) y la implementación del modelo de <strong>ML</strong>, que llamamos el <strong>Modelo Objetivo (TIM)</strong>. El propósito de la <strong>MLMD</strong> es asegurar que el <strong>TIM</strong> reproduzca el comportamiento observado del <strong>TFM</strong>, con la intención de que ambos satisfagan las mismas propiedades. Esto se destaca en la Figura 3.</p><figure><img src="https://placehold.co/500x200/e0e7ff/3730a3?text=Fig.+3:+Propiedades+de+la+MLMD" alt="Figura 3: MLMD para garantizar las propiedades del Modelo ML" class="mx-auto rounded-lg shadow-md"><figcaption><strong>Figura 3:</strong> MLMD para garantizar las propiedades del Modelo ML</figcaption></figure>`,
+                    applicability: `<h2>III. Aplicabilidad del Enfoque</h2><p>En esta sección, detallamos el enfoque propuesto en la Sección II-D sobre diferentes métricas para demostrar que siempre es posible construir εM y gM. Luego nos centramos en cómo construir una <strong>MLMD</strong> en un nivel de semántica de replicación SLx. Elegimos confiar en el formato <strong>ONNX</strong>, uno de los más ampliamente soportados por los marcos de entrenamiento populares en la comunidad de <strong>ML</strong>. Esto convierte a <strong>ONNX</strong> en un candidato principal como formato de <strong>MLMD</strong> que apoya el Objetivo 1.</p>`,
+                    setup: `<h2>IV. Configuración Experimental</h2><p>Para evaluar la preservación semántica de los modelos de <strong>ML</strong> (§ II-C), consideramos casos de uso industriales y su despliegue como <strong>TIM</strong>. Además, automatizamos los métodos de Construcción y Replicación de <strong>MLMD</strong> utilizando herramientas disponibles en la literatura para evaluar cómo derivar y verificar <strong>TIM</strong> de SL3, a partir de un <strong>TFM</strong>. Esto da como resultado una serie de configuraciones experimentales, cada una denotada de la siguiente manera: <code>mdl-exp-repr-gen-env</code>.</p>`,
+                    results: `<h2>V. Resultados</h2><p>La evaluación de la preservación semántica para las configuraciones consideradas se basa en el enfoque propuesto en la Sección III. Primero consideramos para cada caso de uso las propiedades satisfechas por el <strong>TFM</strong>, y el presupuesto correspondiente gM para varias métricas M, para calcular el error aceptable εM entre el <strong>TFM</strong> y el <strong>TIM</strong>.</p>`,
+                    related_work: `<h2>VI. Trabajo Relacionado</h2><p>Las herramientas de exportación de modelos están diseñadas para traducir la semántica del marco de entrenamiento a la semántica de la <strong>MLMD</strong>. Sin embargo, los pasos de traducción variados o repetidos pueden llevar a numerosos problemas de compatibilidad y replicación, reportados en la encuesta <span class="citation" data-ref="21">[21]</span>. <span class="citation" data-ref="18">[18]</span> destacó además el compromiso entre el rendimiento de la inferencia del modelo y la precisión al usar aceleradores de hardware.</p>`,
+                    conclusion: `<h2>VII. Conclusión</h2><p>En el desarrollo de aviónica heredada, la industrialización y la certificación requieren que la verificación de requisitos o propiedades se realice en el <strong>TIM</strong>, a menos que se proporcione un argumento para justificar que la verificación que se realizó en un entorno de ejecución diferente sigue siendo válida en el <strong>TIM</strong>. Un argumento podría ser una replicación bit a bit entre el <strong>TFM</strong> y el <strong>TIM</strong>, lo cual es una restricción bastante difícil en el desarrollo. Para evitar esta restricción, proponemos una definición de preservación de la semántica del modelo de <strong>ML</strong> y una metodología de verificación de apoyo, basada en métricas de <strong>ML</strong> de última generación.</p>`,
+                    references: `<h2>Referencias</h2><p>[Traducción al español de las Referencias]</p>`
+                }
+            }
+        };
+
+        // --- APPLICATION LOGIC ---
+        let currentLang = 'en';
+        let currentPage = 'abstract';
+
+        const mainTitleEl = document.getElementById('main-title');
+        const authorsEl = document.getElementById('authors');
+        const navigationEl = document.getElementById('navigation');
+        const contentWrapperEl = document.getElementById('content-wrapper');
+        const langSelectorEl = document.getElementById('lang-selector');
+        
+        const audioTitleEl = document.getElementById('audio-title');
+        const audioPlayerEl = document.getElementById('audio-player');
+        const audioSourceEl = document.getElementById('audio-source');
+        const audioNoteEl = document.getElementById('audio-note');
+
+        function detectLanguage() {
+            const browserLang = navigator.language.split('-')[0];
+            return ['fr', 'de', 'es', 'en'].includes(browserLang) ? browserLang : 'en';
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            updateUI();
+            
+            // Update active button style
+            langSelectorEl.querySelectorAll('button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
             });
+        }
+
+        function setPage(page) {
+            currentPage = page;
+            renderContent();
+            updateActiveNav();
+            window.scrollTo(0, 0);
+        }
+        
+        function highlightAcronyms(htmlContent) {
+            const acronyms = ['ML', 'EASA', 'EUROCAE/SAE', 'ED-324', 'MLMD', 'TIM', 'TFM', 'ONNX', 'LSTM', 'MLP', 'ORT', 'API', 'IoU', 'MAE', 'MSE', 'EVS', 'MAPE'];
+            const regex = new RegExp(`\\b(${acronyms.join('|')})\\b`, 'g');
+            return htmlContent.replace(regex, '<strong>$1</strong>');
+        }
+
+        function renderContent() {
+            const langContent = content[currentLang];
+            const pageContent = langContent.sections[currentPage] || `<p>Content not available.</p>`;
+            contentWrapperEl.innerHTML = highlightAcronyms(pageContent);
+            addCitationListeners();
+        }
+
+        function updateUI() {
+            const langContent = content[currentLang];
+            
+            // Update texts
+            mainTitleEl.textContent = langContent.title;
+            authorsEl.textContent = langContent.authors;
+            audioTitleEl.textContent = langContent.audio.title;
+            audioNoteEl.textContent = langContent.audio.note;
+
+            // Update audio source
+            const audioFileName = `DeepDive-${currentLang}.mp3`;
+            // Using a placeholder as actual files don't exist
+            audioSourceEl.src = `https://placehold.co/10x10/ffffff/ffffff?text=${audioFileName}`; 
+            audioPlayerEl.load();
+
+            // Re-render navigation and content
+            renderNavigation();
+            renderContent();
+        }
+
+        function renderNavigation() {
+            const navItems = content[currentLang].nav;
+            navigationEl.innerHTML = '';
+            for (const key in navItems) {
+                // Simplified check for content existence
+                if (content[currentLang].sections[key] || key === 'references') {
+                     const li = document.createElement('li');
+                     li.innerHTML = `<a href="#" data-page="${key}" class="nav-link block px-4 py-2 text-sm rounded-md hover:bg-gray-100">${navItems[key]}</a>`;
+                     navigationEl.appendChild(li);
+                }
+            }
+            updateActiveNav();
+        }
+        
+        function updateActiveNav() {
+            navigationEl.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.toggle('active', link.dataset.page === currentPage);
+            });
+        }
+
+        function addCitationListeners() {
+            contentWrapperEl.querySelectorAll('.citation').forEach(citation => {
+                citation.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const refId = `ref-${citation.dataset.ref}`;
+                    setPage('references');
+                    // Use timeout to ensure content is rendered before scrolling
+                    setTimeout(() => {
+                        const refElement = document.getElementById(refId);
+                        if (refElement) {
+                            refElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            refElement.style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
+                            setTimeout(() => {
+                                refElement.style.backgroundColor = '';
+                            }, 2000);
+                        }
+                    }, 100);
+                });
+            });
+        }
+
+        // --- EVENT LISTENERS ---
+        langSelectorEl.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                setLanguage(e.target.dataset.lang);
+            }
         });
+
+        navigationEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (e.target.tagName === 'A') {
+                setPage(e.target.dataset.page);
+            }
+        });
+
+        // --- INITIALIZATION ---
+        // Initial setup
+        const initialLang = detectLanguage();
+        setLanguage(initialLang);
+        setPage('abstract');
+    });
     </script>
 
 </body>
